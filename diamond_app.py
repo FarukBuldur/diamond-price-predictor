@@ -21,10 +21,13 @@ mongo_pass = os.environ.get('MONGO_PASS')
 if mongo_pass == None:
     # self.logger.error(f'Mongo Tapu Secret Not Properly Passed')
     raise MongoCredential
-client = pymongo.MongoClient("mongodb+srv://diamond_user:"+mongo_pass+"@cluster0.hltrk.mongodb.net/", 
+try:
+    client = pymongo.MongoClient("mongodb+srv://diamond_user:"+mongo_pass+"@cluster0.hltrk.mongodb.net/", 
                                 maxPoolSize=100, 
                                 waitQueueTimeoutMS=1, 
                                 waitQueueMultiple=1)
+except:
+    pass
 
 @app.route('/')
 def home():
