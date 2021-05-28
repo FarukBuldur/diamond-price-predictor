@@ -1,1 +1,1 @@
-web: gunicorn diamond_app:app
+web: gunicorn diamond_app:app --preload
