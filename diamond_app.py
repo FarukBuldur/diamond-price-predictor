@@ -8,9 +8,23 @@ Created on Tue Jul 21 09:30:19 2020
 import numpy as np
 from flask import Flask, request, jsonify, render_template
 import pickle
+import os
+import pymongo
 
 app = Flask(__name__,template_folder='')
 diamond = pickle.load(open('diamond.pkl', 'rb'))
+
+class MongoCredential(Exception):
+    pass
+
+mongo_pass = os.environ.get('MONGO_PASS')
+if mongo_pass == None:
+    # self.logger.error(f'Mongo Tapu Secret Not Properly Passed')
+    raise MongoCredential
+client = pymongo.MongoClient("mongodb+srv://diamond_user:"+mongo_pass+"@cluster0.hltrk.mongodb.net/", 
+                                maxPoolSize=100, 
+                                waitQueueTimeoutMS=1, 
+                                waitQueueMultiple=1)
 
 @app.route('/')
 def home():
@@ -79,7 +93,25 @@ def predict():
         mail_params = [['Estimated Diamond Price is:  $ {:,.2f}'.format(prediction[0])][0],
         final_features[0][2],final_features[0][3],final_features[0][4],final_features[0][5],final_features[0][6]]
 
-        # email_sender(final_features[0][1],mail_params)
+        ### DatabaseSave
+        try:
+            database_name = "Diamond"
+            collection_name_archive = "Queries"
+            database = client[database_name]
+            prefArchive = database[collection_name_archive]
+            #### prefArchive to be populated !!
+
+            prefArchive.insert_one({"User Name":int_features[0], 
+                        "Email":int_features[1],
+                        "Carat":int_features[2],
+                        "Cut": int_features[3],
+                        "Color": int_features[4],
+                        "Clarity": int_features[5],
+                        "Comment": int_features[6],
+                        })
+        except:
+            pass
+        
         return render_template('result.html', message='Estimated Diamond Price is $ {:,.2f}'.format(prediction[0]))
 
 
